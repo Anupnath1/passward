@@ -36,7 +36,11 @@ class MainActivity : FragmentActivity() {
         biometricAuthManager = BiometricAuthManager(this)
 
         setContent {
-            PasswardTheme {
+            val systemDark = androidx.compose.foundation.isSystemInDarkTheme()
+            val isDarkThemeState = androidx.compose.runtime.remember { mutableStateOf<Boolean?>(null) }
+            val currentDark = isDarkThemeState.value ?: systemDark
+
+            PasswardTheme(darkTheme = currentDark) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -45,7 +49,11 @@ class MainActivity : FragmentActivity() {
                         isUnlocked = isUnlocked.value,
                         onRequestUnlock = { promptUnlock() },
                         onLockVault = { isUnlocked.value = false },
-                        cryptoManager = cryptoManager
+                        cryptoManager = cryptoManager,
+                        isDarkTheme = currentDark,
+                        onToggleTheme = {
+                            isDarkThemeState.value = !currentDark
+                        }
                     )
                 }
             }
