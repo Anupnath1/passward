@@ -46,26 +46,36 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
+          - name: Check for Android Project Files
+        working-directory: android
+        run: |
+          if [ ! -d "app" ]; then
+            echo "::error title=Missing Android Source Code::The 'android/app' folder was not found."
+            exit 1
+          fi
+
       - name: Build Debug APK
         working-directory: android
         run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          if [ -f "./gradlew" ]; then
+            chmod +x gradlew
+            ./gradlew assembleDebug --no-daemon --stacktrace
+          else
+            gradle assembleDebug --no-daemon --stacktrace
+          fi
 
-      - name: Upload APK as Artifact
+      - name: Upload APK as Artifact (Direct Download to Laptop)
         uses: actions/upload-artifact@v4
         with:
-          name: Password-debug-apk
+          name: Passward-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
 
-      - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Create GitHub Release & Upload APK
         uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          name: Password ${{ github.ref_name }}
+          name: Passward ${{ github.ref_name }}
           draft: false
           prerelease: false
           files: android/app/build/outputs/apk/debug/app-debug.apk
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
