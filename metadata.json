@@ -1,0 +1,6 @@
+{
+  "name": "Save My Password",
+  "description": "Secure, personal offline password vault for Android with biometric authentication and AES-256 local encrypted storage.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
