@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "Save My Password"
+rootProject.name = "Passward"
 include(":app")

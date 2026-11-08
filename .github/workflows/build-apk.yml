@@ -1,5 +1,4 @@
-
-name: Build Password APK
+name: Build Passward APK
 
 on:
   push:
@@ -26,33 +25,8 @@ jobs:
           cache: gradle
           cache-dependency-path: android/**/*.gradle*
 
-      - name: Check Android Project Files
-        run: |
-          if [ ! -d "android/app" ]; then
-            echo "::error::Android app folder not found at android/app"
-            exit 1
-          fi
-
-          if [ ! -f "android/gradlew" ]; then
-            echo "::error::Gradle wrapper not found at android/gradlew"
-            exit 1
-          fi
-
-          if [ ! -d "android/gradle/wrapper" ]; then
-            echo "::error::Gradle wrapper configuration not found"
-            exit 1
-          fi
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
-
-          - name: Check for Android Project Files
-        working-directory: android
-        run: |
-          if [ ! -d "app" ]; then
-            echo "::error title=Missing Android Source Code::The 'android/app' folder was not found."
-            exit 1
-          fi
 
       - name: Build Debug APK
         working-directory: android
@@ -79,3 +53,5 @@ jobs:
           draft: false
           prerelease: false
           files: android/app/build/outputs/apk/debug/app-debug.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

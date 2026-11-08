@@ -7,61 +7,117 @@
 export interface AndroidFile {
   path: string;
   name: string;
-  language: 'kotlin' | 'xml' | 'groovy' | 'markdown';
+  language: 'kotlin' | 'xml' | 'groovy' | 'markdown' | 'properties';
   content: string;
   description: string;
 }
 
 export const ANDROID_PROJECT_FILES: AndroidFile[] = [
   {
-    path: 'app/src/main/AndroidManifest.xml',
-    name: 'AndroidManifest.xml',
-    language: 'xml',
-    description: 'Android Manifest with zero INTERNET permission, hardware biometric prompt, and window security',
-    content: `<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <!-- Strictly NO android.permission.INTERNET! 100% Offline Vault -->
-    
-    <!-- Biometric Authentication permissions -->
-    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
-    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
-    
-    <!-- Optional: Hardware fingerprint/face features -->
-    <uses-feature android:name="android.hardware.fingerprint" android:required="false" />
-    <uses-feature android:name="android.hardware.biometrics.face" android:required="false" />
-
-    <application
-        android:name=".SaveMyPasswordApp"
-        android:allowBackup="false"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="false"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.SaveMyPassword">
-        
-        <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize"
-            android:theme="@style/Theme.SaveMyPassword">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-    </application>
-
-</manifest>`
+    path: 'settings.gradle.kts',
+    name: 'settings.gradle.kts',
+    language: 'groovy',
+    description: 'Gradle settings registering plugins and module :app',
+    content: `pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+rootProject.name = "Passward"
+include(":app")
+`
+  },
+  {
+    path: 'build.gradle.kts',
+    name: 'build.gradle.kts (Project)',
+    language: 'groovy',
+    description: 'Root Gradle configuration defining Android Gradle Plugin and Kotlin versions',
+    content: `plugins {
+    id("com.android.application") version "8.2.2" apply false
+    id("org.jetbrains.kotlin.android") version "1.9.22" apply false
+    id("org.jetbrains.kotlin.kapt") version "1.9.22" apply false
+}
+`
+  },
+  {
+    path: 'gradle.properties',
+    name: 'gradle.properties',
+    language: 'properties',
+    description: 'Project-wide Gradle configuration for memory and AndroidX',
+    content: `# Project-wide Gradle settings.
+org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+android.useAndroidX=true
+kotlin.code.style=official
+android.nonTransitiveRClass=true
+`
+  },
+  {
+    path: 'gradle/wrapper/gradle-wrapper.properties',
+    name: 'gradle-wrapper.properties',
+    language: 'properties',
+    description: 'Gradle wrapper version (8.4) for Android Studio auto-detection',
+    content: `distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\\://services.gradle.org/distributions/gradle-8.4-bin.zip
+networkTimeout=10000
+validateDistributionUrl=true
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+`
+  },
+  {
+    path: 'gradlew',
+    name: 'gradlew',
+    language: 'markdown',
+    description: 'Unix shell script to run Gradle without pre-installing Gradle',
+    content: `#!/bin/sh
+app_path=$0
+while [ -h "$app_path" ]; do
+    ls=\`ls -ld "$app_path"\`
+    link=\`expr "$ls" : '.*-> \\(.*\\)$'\`
+    if expr "$link" : '/.*' > /dev/null; then app_path="$link"; else app_path=\`dirname "$app_path"\`"/$link"; fi
+done
+APP_BASE_NAME=\`basename "$0"\`
+APP_HOME=\`cd "\\\`dirname \\"$app_path\\"\\\`" > /dev/null && pwd\`
+CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
+if [ -n "$JAVA_HOME" ] ; then JAVACMD=$JAVA_HOME/bin/java; else JAVACMD=java; fi
+exec "$JAVACMD" "-Dorg.gradle.appname=$APP_BASE_NAME" -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"
+`
+  },
+  {
+    path: 'gradlew.bat',
+    name: 'gradlew.bat',
+    language: 'markdown',
+    description: 'Windows batch script to run Gradle on Windows PCs',
+    content: `@if "%DEBUG%" == "" @echo off
+set DIRNAME=%~dp0
+if "%DIRNAME%" == "" set DIRNAME=.
+set APP_BASE_NAME=%~n0
+set APP_HOME=%DIRNAME%
+set CLASSPATH=%APP_HOME%\\gradle\\wrapper\\gradle-wrapper.jar
+if defined JAVA_HOME goto findJavaFromJavaHome
+set JAVA_EXE=java.exe
+goto execute
+:findJavaFromJavaHome
+set JAVA_EXE=%JAVA_HOME%\\bin\\java.exe
+:execute
+"%JAVA_EXE%" "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %*
+`
   },
   {
     path: 'app/build.gradle.kts',
     name: 'build.gradle.kts (Module: app)',
     language: 'groovy',
-    description: 'Gradle configuration targeting Android 14 (API 34) with Jetpack Compose & Room',
+    description: 'App module build script: Jetpack Compose, Room, Biometric, Keystore',
     content: `plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -74,7 +130,7 @@ android {
 
     defaultConfig {
         applicationId = "com.passward.app"
-        minSdk = 34
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"
@@ -87,13 +143,11 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("debug")
         }
         debug {
             applicationIdSuffix = ".debug"
@@ -126,8 +180,9 @@ android {
 }
 
 dependencies {
-    // Core Android & Lifecycle
     implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("androidx.fragment:fragment-ktx:1.6.2")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
@@ -140,11 +195,11 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.2.0")
     implementation("androidx.compose.material:material-icons-extended")
 
-    // Android Biometrics & Keystore Crypto
+    // Android Biometrics & Keystore Security Crypto
     implementation("androidx.biometric:biometric:1.2.0-alpha05")
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
-    // Room Database for Encrypted Local Storage
+    // Room Database
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
@@ -152,16 +207,162 @@ dependencies {
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
-    // Debugging UI tools
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-}`
+}
+`
   },
   {
-    path: 'app/src/main/java/com/savemypassword/app/security/CryptoManager.kt',
+    path: 'app/proguard-rules.pro',
+    name: 'proguard-rules.pro',
+    language: 'markdown',
+    description: 'ProGuard obfuscation rules for Room and Biometric',
+    content: `# Proguard rules for Passward
+-keep class com.passward.app.data.** { *; }
+-keep class androidx.room.** { *; }
+-dontwarn androidx.biometric.**
+`
+  },
+  {
+    path: 'app/src/main/AndroidManifest.xml',
+    name: 'AndroidManifest.xml',
+    language: 'xml',
+    description: 'Android Manifest with zero INTERNET permission, hardware biometric prompt, and window security',
+    content: `<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Strictly NO android.permission.INTERNET! 100% Offline Vault -->
+    
+    <!-- Biometric Authentication permissions -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+    
+    <!-- Optional: Hardware fingerprint/face features -->
+    <uses-feature android:name="android.hardware.fingerprint" android:required="false" />
+    <uses-feature android:name="android.hardware.biometrics.face" android:required="false" />
+
+    <application
+        android:name=".PasswardApp"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="false"
+        android:icon="@drawable/ic_launcher_foreground"
+        android:label="@string/app_name"
+        android:roundIcon="@drawable/ic_launcher_foreground"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Passward">
+        
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/Theme.Passward">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+`
+  },
+  {
+    path: 'app/src/main/res/values/strings.xml',
+    name: 'strings.xml',
+    language: 'xml',
+    description: 'Application string resources',
+    content: `<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Passward</string>
+</resources>
+`
+  },
+  {
+    path: 'app/src/main/res/values/colors.xml',
+    name: 'colors.xml',
+    language: 'xml',
+    description: 'Color resources',
+    content: `<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#4F46E5</color>
+    <color name="primary_dark">#4338CA</color>
+    <color name="accent">#06B6D4</color>
+    <color name="background">#0F172A</color>
+</resources>
+`
+  },
+  {
+    path: 'app/src/main/res/values/themes.xml',
+    name: 'themes.xml',
+    language: 'xml',
+    description: 'Application theme definitions',
+    content: `<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Passward" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+</resources>
+`
+  },
+  {
+    path: 'app/src/main/res/xml/data_extraction_rules.xml',
+    name: 'data_extraction_rules.xml',
+    language: 'xml',
+    description: 'Offline privacy rules preventing cloud extraction of passwords',
+    content: `<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude path="/" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude path="/" />
+    </device-transfer>
+</data-extraction-rules>
+`
+  },
+  {
+    path: 'app/src/main/res/drawable/ic_launcher_foreground.xml',
+    name: 'ic_launcher_foreground.xml',
+    language: 'xml',
+    description: 'Vector launcher shield icon',
+    content: `<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#4F46E5"
+        android:pathData="M0,0h108v108h-108z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,26L34,35v19c0,13.2 8.5,25.5 20,28c11.5,-2.5 20,-14.8 20,-28V35L54,26zM51,62l-8,-8l2.8,-2.8l5.2,5.2l12.2,-12.2l2.8,2.8L51,62z"/>
+</vector>
+`
+  },
+  {
+    path: 'app/src/main/java/com/passward/app/PasswardApp.kt',
+    name: 'PasswardApp.kt',
+    language: 'kotlin',
+    description: 'Application subclass for Passward',
+    content: `package com.passward.app
+
+import android.app.Application
+
+class PasswardApp : Application() {
+    override fun onCreate() {
+        super.onCreate()
+    }
+}
+`
+  },
+  {
+    path: 'app/src/main/java/com/passward/app/security/CryptoManager.kt',
     name: 'CryptoManager.kt',
     language: 'kotlin',
-    description: 'Hardware-backed AES-256-GCM encryption with AndroidKeyStore',
+    description: 'Hardware-backed AES-256-GCM encryption using AndroidKeyStore',
     content: `package com.passward.app.security
 
 import android.security.keystore.KeyGenParameterSpec
@@ -174,10 +375,6 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
-/**
- * Manages AES-256-GCM encryption/decryption using hardware-backed Android KeyStore.
- * Keys never leave the secure hardware element.
- */
 class CryptoManager {
 
     private val keyStore = KeyStore.getInstance("AndroidKeyStore").apply {
@@ -188,7 +385,7 @@ class CryptoManager {
         private const val ALGORITHM = KeyProperties.KEY_ALGORITHM_AES
         private const val BLOCK_MODE = KeyProperties.BLOCK_MODE_GCM
         private const val PADDING = KeyProperties.ENCRYPTION_PADDING_NONE
-        private const val TRANSFORMATION = "\$ALGORITHM/\$BLOCK_MODE/\$PADDING"
+        private const val TRANSFORMATION = "$ALGORITHM/$BLOCK_MODE/$PADDING"
         private const val KEY_ALIAS = "passward_master_key_v1"
         private const val TAG_LENGTH_BITS = 128
         private const val IV_SIZE_BYTES = 12
@@ -209,41 +406,33 @@ class CryptoManager {
                     .setBlockModes(BLOCK_MODE)
                     .setEncryptionPaddings(PADDING)
                     .setKeySize(256)
-                    .setUserAuthenticationRequired(false) // Master key guarded by BiometricPrompt
+                    .setUserAuthenticationRequired(false)
                     .setRandomizedEncryptionRequired(true)
                     .build()
             )
         }.generateKey()
     }
 
-    /**
-     * Encrypts plaintext bytes using AES-GCM-256.
-     * The 12-byte IV is prepended to the ciphertext.
-     */
     fun encrypt(bytes: ByteArray): ByteArray {
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, getOrCreateKey())
+
         val iv = cipher.iv
-        val encryptedBytes = cipher.doFinal(bytes)
+        val encryptedData = cipher.doFinal(bytes)
 
         val outputStream = ByteArrayOutputStream()
         outputStream.write(iv)
-        outputStream.write(encryptedBytes)
+        outputStream.write(encryptedData)
         return outputStream.toByteArray()
     }
 
-    /**
-     * Decrypts encrypted bytes by reading the first 12 bytes as IV.
-     */
-    fun decrypt(encryptedBytesWithIv: ByteArray): ByteArray {
-        if (encryptedBytesWithIv.size <= IV_SIZE_BYTES) {
-            throw IllegalArgumentException("Invalid encrypted payload size")
-        }
-
-        val inputStream = ByteArrayInputStream(encryptedBytesWithIv)
+    fun decrypt(encryptedPayload: ByteArray): ByteArray {
+        val inputStream = ByteArrayInputStream(encryptedPayload)
         val iv = ByteArray(IV_SIZE_BYTES)
         inputStream.read(iv)
-        val ciphertext = inputStream.readBytes()
+
+        val ciphertext = ByteArray(encryptedPayload.size - IV_SIZE_BYTES)
+        inputStream.read(ciphertext)
 
         val cipher = Cipher.getInstance(TRANSFORMATION)
         val spec = GCMParameterSpec(TAG_LENGTH_BITS, iv)
@@ -259,16 +448,16 @@ class CryptoManager {
     fun decryptToString(encryptedBytes: ByteArray): String {
         return String(decrypt(encryptedBytes), Charsets.UTF_8)
     }
-}`
+}
+`
   },
   {
-    path: 'app/src/main/java/com/savemypassword/app/security/BiometricAuthManager.kt',
+    path: 'app/src/main/java/com/passward/app/security/BiometricAuthManager.kt',
     name: 'BiometricAuthManager.kt',
     language: 'kotlin',
     description: 'BiometricPrompt controller supporting Fingerprint, Face Unlock & Phone PIN',
     content: `package com.passward.app.security
 
-import android.content.Context
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
@@ -276,9 +465,6 @@ import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 
-/**
- * Manages device-level authentication (Fingerprint, Face, or PIN/Pattern/Password).
- */
 class BiometricAuthManager(private val activity: FragmentActivity) {
 
     fun canAuthenticate(): Boolean {
@@ -316,17 +502,17 @@ class BiometricAuthManager(private val activity: FragmentActivity) {
 
                 override fun onAuthenticationFailed() {
                     super.onAuthenticationFailed()
-                    // Biometric sensor recognized an unauthenticated finger/face
                 }
             }
         )
 
         biometricPrompt.authenticate(promptInfo)
     }
-}`
+}
+`
   },
   {
-    path: 'app/src/main/java/com/savemypassword/app/data/PasswordEntity.kt',
+    path: 'app/src/main/java/com/passward/app/data/PasswordEntity.kt',
     name: 'PasswordEntity.kt',
     language: 'kotlin',
     description: 'Encrypted Room Database entity for password records',
@@ -342,40 +528,20 @@ data class PasswordEntity(
     val serviceName: String,
     val category: String, // website, app, email, wifi, financial, other
     val username: String,
-    // Sensitive fields are encrypted using CryptoManager before storing into SQLite
     val encryptedPassword: ByteArray,
     val encryptedNotes: ByteArray? = null,
     val url: String = "",
     val isFavorite: Boolean = false,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as PasswordEntity
-
-        if (id != other.id) return false
-        if (serviceName != other.serviceName) return false
-        if (!encryptedPassword.contentEquals(other.encryptedPassword)) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = id.hashCode()
-        result = 31 * result + serviceName.hashCode()
-        result = 31 * result + encryptedPassword.contentHashCode()
-        return result
-    }
-}`
+)
+`
   },
   {
-    path: 'app/src/main/java/com/savemypassword/app/data/PasswordDao.kt',
+    path: 'app/src/main/java/com/passward/app/data/PasswordDao.kt',
     name: 'PasswordDao.kt',
     language: 'kotlin',
-    description: 'Room Data Access Object (DAO) with Flow streams',
+    description: 'Room DAO for encrypted SQLite CRUD queries',
     content: `package com.passward.app.data
 
 import androidx.room.*
@@ -383,14 +549,12 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PasswordDao {
+
     @Query("SELECT * FROM passwords ORDER BY isFavorite DESC, serviceName ASC")
     fun getAllPasswords(): Flow<List<PasswordEntity>>
 
-    @Query("SELECT * FROM passwords WHERE category = :category ORDER BY serviceName ASC")
+    @Query("SELECT * FROM passwords WHERE category = :category ORDER BY isFavorite DESC, serviceName ASC")
     fun getPasswordsByCategory(category: String): Flow<List<PasswordEntity>>
-
-    @Query("SELECT * FROM passwords WHERE serviceName LIKE '%' || :query || '%' OR username LIKE '%' || :query || '%' ORDER BY serviceName ASC")
-    fun searchPasswords(query: String): Flow<List<PasswordEntity>>
 
     @Query("SELECT * FROM passwords WHERE id = :id LIMIT 1")
     suspend fun getPasswordById(id: Long): PasswordEntity?
@@ -405,14 +569,15 @@ interface PasswordDao {
     suspend fun deletePassword(password: PasswordEntity)
 
     @Query("DELETE FROM passwords")
-    suspend fun deleteAll()
-}`
+    suspend fun deleteAllPasswords()
+}
+`
   },
   {
-    path: 'app/src/main/java/com/savemypassword/app/data/AppDatabase.kt',
+    path: 'app/src/main/java/com/passward/app/data/AppDatabase.kt',
     name: 'AppDatabase.kt',
     language: 'kotlin',
-    description: 'Encrypted Room Database singleton instance',
+    description: 'Room Database provider singleton',
     content: `package com.passward.app.data
 
 import android.content.Context
@@ -422,18 +587,19 @@ import androidx.room.RoomDatabase
 
 @Database(entities = [PasswordEntity::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
+
     abstract fun passwordDao(): PasswordDao
 
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
-        fun getInstance(context: Context): AppDatabase {
+        fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "passward_encrypted.db"
+                    "passward_encrypted_vault.db"
                 )
                     .fallbackToDestructiveMigration()
                     .build()
@@ -442,10 +608,111 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
     }
-}`
+}
+`
   },
   {
-    path: 'app/src/main/java/com/savemypassword/app/MainActivity.kt',
+    path: 'app/src/main/java/com/passward/app/ui/theme/Color.kt',
+    name: 'Color.kt',
+    language: 'kotlin',
+    description: 'Theme color palette for Material 3',
+    content: `package com.passward.app.ui.theme
+
+import androidx.compose.ui.graphics.Color
+
+val IndigoPrimary = Color(0xFF4F46E5)
+val IndigoDark = Color(0xFF4338CA)
+val IndigoLight = Color(0xFF818CF8)
+val DarkBackground = Color(0xFF0F172A)
+val DarkSurface = Color(0xFF1E293B)
+val LightBackground = Color(0xFFF8FAFC)
+val LightSurface = Color(0xFFFFFFFF)
+val EmeraldSuccess = Color(0xFF10B981)
+val RoseError = Color(0xFFF43F5E)
+`
+  },
+  {
+    path: 'app/src/main/java/com/passward/app/ui/theme/Theme.kt',
+    name: 'Theme.kt',
+    language: 'kotlin',
+    description: 'PasswardTheme Material 3 Composable wrapper',
+    content: `package com.passward.app.ui.theme
+
+import android.app.Activity
+import android.os.Build
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
+
+private val DarkColorScheme = darkColorScheme(
+    primary = IndigoPrimary,
+    secondary = IndigoLight,
+    background = DarkBackground,
+    surface = DarkSurface,
+    onPrimary = LightSurface,
+    onBackground = LightSurface,
+    onSurface = LightSurface
+)
+
+private val LightColorScheme = lightColorScheme(
+    primary = IndigoPrimary,
+    secondary = IndigoDark,
+    background = LightBackground,
+    surface = LightSurface,
+    onPrimary = LightSurface,
+    onBackground = DarkBackground,
+    onSurface = DarkBackground
+)
+
+@Composable
+fun PasswardTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    dynamicColor: Boolean = true,
+    content: @Composable () -> Unit
+) {
+    val colorScheme = when {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            val context = LocalContext.current
+            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        }
+        darkTheme -> DarkColorScheme
+        else -> LightColorScheme
+    }
+
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as? Activity)?.window
+            if (window != null) {
+                window.statusBarColor = colorScheme.background.toArgb()
+                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            }
+        }
+    }
+
+    MaterialTheme(
+        colorScheme = colorScheme,
+        content = content
+    )
+}
+
+@Composable
+fun SaveMyPasswordTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    dynamicColor: Boolean = true,
+    content: @Composable () -> Unit
+) {
+    PasswardTheme(darkTheme = darkTheme, dynamicColor = dynamicColor, content = content)
+}
+`
+  },
+  {
+    path: 'app/src/main/java/com/passward/app/MainActivity.kt',
     name: 'MainActivity.kt',
     language: 'kotlin',
     description: 'Main Activity with FLAG_SECURE screenshot prevention & auto-lock lifecycle',
@@ -455,20 +722,18 @@ import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.*
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.lifecycleScope
+import androidx.fragment.app.FragmentActivity
 import com.passward.app.security.BiometricAuthManager
 import com.passward.app.security.CryptoManager
 import com.passward.app.ui.VaultApp
-import com.passward.app.ui.theme.SaveMyPasswordTheme
-import kotlinx.coroutines.launch
+import com.passward.app.ui.theme.PasswardTheme
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : FragmentActivity() {
 
     private lateinit var biometricAuthManager: BiometricAuthManager
     private val cryptoManager = CryptoManager()
@@ -489,7 +754,7 @@ class MainActivity : AppCompatActivity() {
         biometricAuthManager = BiometricAuthManager(this)
 
         setContent {
-            SaveMyPasswordTheme {
+            PasswardTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -521,25 +786,30 @@ class MainActivity : AppCompatActivity() {
             onSuccess = {
                 isUnlocked.value = true
             },
-            onError = { err ->
-                // Keep locked until authenticated
+            onError = { _ ->
                 isUnlocked.value = false
             }
         )
     }
-}`
+}
+`
   },
   {
-    path: 'app/src/main/java/com/savemypassword/app/ui/VaultScreens.kt',
+    path: 'app/src/main/java/com/passward/app/ui/VaultScreens.kt',
     name: 'VaultScreens.kt',
     language: 'kotlin',
     description: 'Jetpack Compose Material 3 screens: Vault dashboard, FAB, Generator & Dialogs',
     content: `package com.passward.app.ui
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -551,10 +821,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.passward.app.data.AppDatabase
+import com.passward.app.data.PasswordEntity
 import com.passward.app.security.CryptoManager
+import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -564,8 +841,18 @@ fun VaultApp(
     onLockVault: () -> Unit,
     cryptoManager: CryptoManager
 ) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val db = remember { AppDatabase.getDatabase(context) }
+    val passwordDao = db.passwordDao()
+
+    val passwordsFlow by passwordDao.getAllPasswords().collectAsState(initial = emptyList())
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf("all") }
+    var showAddDialog by remember { mutableStateOf(false) }
+
     if (!isUnlocked) {
-        // Android 14 Biometric Lock Screen
+        // Biometric Lock Screen
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -574,26 +861,27 @@ fun VaultApp(
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(18.dp),
+                modifier = Modifier.padding(24.dp)
             ) {
                 Box(
                     modifier = Modifier
-                        .size(96.dp)
+                        .size(100.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Fingerprint,
-                        contentDescription = "Fingerprint Sensor",
+                        contentDescription = "Biometric Lock",
                         tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(54.dp)
+                        modifier = Modifier.size(56.dp)
                     )
                 }
 
                 Text(
                     text = "Passward",
-                    fontSize = 24.sp,
+                    fontSize = 26.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -604,25 +892,44 @@ fun VaultApp(
                     color = MaterialTheme.colorScheme.outline
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 Button(
                     onClick = onRequestUnlock,
-                    shape = RoundedCornerShape(24.dp)
+                    shape = RoundedCornerShape(24.dp),
+                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 14.dp)
                 ) {
                     Icon(imageVector = Icons.Default.LockOpen, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Authenticate to Open")
+                    Text("Unlock Vault (Biometric / PIN)")
                 }
             }
         }
     } else {
-        // Vault Main Dashboard Screen
+        // Vault Dashboard
+        val categories = listOf("all", "website", "app", "email", "wifi", "financial", "other")
+        val filteredPasswords = remember(passwordsFlow, searchQuery, selectedCategory) {
+            passwordsFlow.filter { item ->
+                val matchesCategory = selectedCategory == "all" || item.category == selectedCategory
+                val matchesSearch = searchQuery.isBlank() ||
+                        item.serviceName.contains(searchQuery, ignoreCase = true) ||
+                        item.username.contains(searchQuery, ignoreCase = true)
+                matchesCategory && matchesSearch
+            }
+        }
+
         Scaffold(
             topBar = {
                 TopAppBar(
                     title = {
-                        Text("Passward", fontWeight = FontWeight.Bold)
+                        Column {
+                            Text("Passward", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                            Text(
+                                "\${passwordsFlow.size} credentials · Offline Keystore",
+                                fontSize = 11.sp,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+                        }
                     },
                     actions = {
                         IconButton(onClick = onLockVault) {
@@ -633,7 +940,7 @@ fun VaultApp(
             },
             floatingActionButton = {
                 FloatingActionButton(
-                    onClick = { /* Open Add Password Sheet */ },
+                    onClick = { showAddDialog = true },
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
@@ -647,62 +954,350 @@ fun VaultApp(
                     .padding(padding)
                     .padding(horizontal = 16.dp)
             ) {
-                // Search Bar
+                // Search Input
                 OutlinedTextField(
-                    value = "",
-                    onValueChange = {},
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
                     placeholder = { Text("Search services, emails, apps...") },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(Icons.Default.Clear, contentDescription = "Clear")
+                            }
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    shape = RoundedCornerShape(16.dp)
+                        .padding(vertical = 6.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    singleLine = true
                 )
 
-                // Password entries list
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                    modifier = Modifier.fillMaxSize()
+                // Category Filter Chips
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.padding(vertical = 8.dp)
                 ) {
-                    // Items rendered with encrypted decryption upon click
+                    items(categories) { cat ->
+                        FilterChip(
+                            selected = selectedCategory == cat,
+                            onClick = { selectedCategory = cat },
+                            label = { Text(cat.replaceFirstChar { it.uppercase() }) },
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                    }
+                }
+
+                if (filteredPasswords.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(bottom = 60.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Key,
+                                contentDescription = null,
+                                modifier = Modifier.size(48.dp),
+                                tint = MaterialTheme.colorScheme.outline
+                            )
+                            Text(
+                                if (searchQuery.isNotBlank()) "No matching passwords found" else "Vault is empty",
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                            Text(
+                                "Tap + to add your first offline encrypted credential",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+                        }
+                    }
+                } else {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 80.dp)
+                    ) {
+                        items(filteredPasswords, key = { it.id }) { item ->
+                            PasswordItemCard(
+                                item = item,
+                                cryptoManager = cryptoManager,
+                                onToggleFavorite = {
+                                    coroutineScope.launch {
+                                        passwordDao.updatePassword(item.copy(isFavorite = !item.isFavorite))
+                                    }
+                                },
+                                onDelete = {
+                                    coroutineScope.launch {
+                                        passwordDao.deletePassword(item)
+                                        Toast.makeText(context, "Password deleted", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        if (showAddDialog) {
+            AddPasswordDialog(
+                onDismiss = { showAddDialog = false },
+                onSave = { service, user, pass, cat, url ->
+                    coroutineScope.launch {
+                        val encryptedPass = cryptoManager.encryptString(pass)
+                        passwordDao.insertPassword(
+                            PasswordEntity(
+                                serviceName = service,
+                                username = user,
+                                category = cat,
+                                url = url,
+                                encryptedPassword = encryptedPass
+                            )
+                        )
+                        showAddDialog = false
+                        Toast.makeText(context, "Password securely saved", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun PasswordItemCard(
+    item: PasswordEntity,
+    cryptoManager: CryptoManager,
+    onToggleFavorite: () -> Unit,
+    onDelete: () -> Unit
+) {
+    val context = LocalContext.current
+    var isPasswordVisible by remember { mutableStateOf(false) }
+    var decryptedPassword by remember { mutableStateOf<String?>(null) }
+
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = item.serviceName,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = item.username,
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = onToggleFavorite) {
+                        Icon(
+                            imageVector = if (item.isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
+                            contentDescription = "Favorite",
+                            tint = if (item.isFavorite) Color(0xFFF59E0B) else MaterialTheme.colorScheme.outline
+                        )
+                    }
+                    IconButton(onClick = onDelete) {
+                        Icon(
+                            imageVector = Icons.Default.DeleteOutline,
+                            contentDescription = "Delete",
+                            tint = MaterialTheme.colorScheme.outline
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = if (isPasswordVisible) (decryptedPassword ?: "••••••••") else "••••••••",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Row {
+                    IconButton(
+                        onClick = {
+                            if (!isPasswordVisible && decryptedPassword == null) {
+                                try {
+                                    decryptedPassword = cryptoManager.decryptToString(item.encryptedPassword)
+                                } catch (_: Exception) {
+                                    decryptedPassword = "Error decrypting"
+                                }
+                            }
+                            isPasswordVisible = !isPasswordVisible
+                        },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = "Toggle visibility",
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(6.dp))
+
+                    IconButton(
+                        onClick = {
+                            try {
+                                val pwd = decryptedPassword ?: cryptoManager.decryptToString(item.encryptedPassword)
+                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                val clip = ClipData.newPlainText("password", pwd)
+                                clipboard.setPrimaryClip(clip)
+                                Toast.makeText(context, "Password copied to clipboard", Toast.LENGTH_SHORT).show()
+                            } catch (_: Exception) {
+                                Toast.makeText(context, "Failed to copy", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ContentCopy,
+                            contentDescription = "Copy Password",
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
         }
     }
-}`
+}
+
+@Composable
+fun AddPasswordDialog(
+    onDismiss: () -> Unit,
+    onSave: (service: String, user: String, pass: String, category: String, url: String) -> Unit
+) {
+    var serviceName by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var category by remember { mutableStateOf("website") }
+    var url by remember { mutableStateOf("") }
+    var isPasswordVisible by remember { mutableStateOf(false) }
+
+    fun generateRandomPassword(): String {
+        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*"
+        return (1..16).map { chars[Random.nextInt(chars.length)] }.joinToString("")
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Add New Password", fontWeight = FontWeight.Bold) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                OutlinedTextField(
+                    value = serviceName,
+                    onValueChange = { serviceName = it },
+                    label = { Text("Service / App Name") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it },
+                    label = { Text("Username / Email") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Password") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        Row {
+                            IconButton(onClick = { password = generateRandomPassword() }) {
+                                Icon(Icons.Default.AutoAwesome, contentDescription = "Generate")
+                            }
+                            IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                                Icon(
+                                    if (isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                    contentDescription = null
+                                )
+                            }
+                        }
+                    }
+                )
+
+                OutlinedTextField(
+                    value = url,
+                    onValueChange = { url = it },
+                    label = { Text("Website URL (Optional)") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (serviceName.isNotBlank() && password.isNotBlank()) {
+                        onSave(serviceName.trim(), username.trim(), password.trim(), category, url.trim())
+                    }
+                },
+                enabled = serviceName.isNotBlank() && password.isNotBlank()
+            ) {
+                Text("Save Encrypted")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+`
   },
   {
     path: 'README.md',
     name: 'README.md',
     language: 'markdown',
     description: 'Instructions on building and installing the native debug APK',
-    content: `# Passward — Android 14 Native Offline Vault
+    content: `# Passward — Android Native Offline Vault (Kotlin + Jetpack Compose)
 
-An ultra-secure, 100% offline personal password manager built natively for **Android 14 (API 34)** using **Kotlin** and **Jetpack Compose**.
+100% offline personal password manager built natively for Android (API 26–34) using Kotlin, Jetpack Compose, Room, BiometricPrompt, and hardware-backed Android KeyStore AES-256.
 
-## Security Architecture
-- **Hardware-backed Encryption**: AES-256-GCM managed via Android KeyStore (\`CryptoManager.kt\`).
-- **Device Authentication**: Uses \`BiometricPrompt\` with \`BIOMETRIC_STRONG or DEVICE_CREDENTIAL\` (Fingerprint, Face Unlock, or Device PIN).
-- **Zero Internet Permission**: \`android.permission.INTERNET\` is completely omitted from \`AndroidManifest.xml\`. The app cannot make network calls even if requested.
-- **FLAG_SECURE**: Screenshots, screen recording, and recent-app previews are strictly blocked to protect passwords from shoulder surfers and malware.
-- **Lifecycle Auto-Lock**: Automatically locks when sent to background (\`onPause\`).
+## How to Open in Android Studio
+1. Open Android Studio (Hedgehog, Iguana, Koala, or newer).
+2. Click **Open** and select this directory.
+3. Gradle 8.4 will automatically sync.
 
-## How to Build the Debug APK
-You can open this project in **Android Studio Hedgehog / Iguana / Ladybug** or compile it from the command line:
-
-\`\`\`bash
-# 1. Grant gradlew execute permission
-chmod +x gradlew
-
-# 2. Build the Debug APK
-./gradlew assembleDebug
-
-# 3. Locate the compiled APK:
-# app/build/outputs/apk/debug/app-debug.apk
-
-# 4. Install onto your connected Android 14 phone:
-adb install app/build/outputs/apk/debug/app-debug.apk
-\`\`\`
+## How to Run on Physical Phone
+1. Enable **Developer options** and **USB debugging** on your phone (Settings > About phone > tap Build number 7 times).
+2. Connect your phone via USB cable and allow the prompt.
+3. Click the green **Run (Play)** button in Android Studio.
 `
   },
   {
@@ -735,13 +1330,6 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
-      - name: Check for Android Project Files
-        run: |
-          if [ ! -d "app" ]; then
-            echo "::error title=Missing Android Source Code::The 'app' folder was not found in your repository! Please upload the extracted Android project files (including 'app', 'gradlew', and 'build.gradle.kts') to this repository."
-            exit 1
-          fi
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
@@ -754,23 +1342,12 @@ jobs:
             gradle assembleDebug --no-daemon --stacktrace
           fi
 
-      - name: Upload APK as Artifact (Direct Download to Laptop)
+      - name: Upload APK as Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Passward-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
-
-      - name: Create GitHub Release & Upload APK
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          name: Passward \${{ github.ref_name }}
-          draft: false
-          prerelease: false
-          files: app/build/outputs/apk/debug/app-debug.apk
-        env:
-          GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
 `
   }
 ];

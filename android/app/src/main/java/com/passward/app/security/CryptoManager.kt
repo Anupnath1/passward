@@ -1,4 +1,4 @@
-package com.savemypassword.app.security
+package com.passward.app.security
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
@@ -21,7 +21,7 @@ class CryptoManager {
         private const val BLOCK_MODE = KeyProperties.BLOCK_MODE_GCM
         private const val PADDING = KeyProperties.ENCRYPTION_PADDING_NONE
         private const val TRANSFORMATION = "$ALGORITHM/$BLOCK_MODE/$PADDING"
-        private const val KEY_ALIAS = "save_my_password_master_key_v1"
+        private const val KEY_ALIAS = "passward_master_key_v1"
         private const val TAG_LENGTH_BITS = 128
         private const val IV_SIZE_BYTES = 12
     }
@@ -51,24 +51,23 @@ class CryptoManager {
     fun encrypt(bytes: ByteArray): ByteArray {
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, getOrCreateKey())
+
         val iv = cipher.iv
-        val encryptedBytes = cipher.doFinal(bytes)
+        val encryptedData = cipher.doFinal(bytes)
 
         val outputStream = ByteArrayOutputStream()
         outputStream.write(iv)
-        outputStream.write(encryptedBytes)
+        outputStream.write(encryptedData)
         return outputStream.toByteArray()
     }
 
-    fun decrypt(encryptedBytesWithIv: ByteArray): ByteArray {
-        if (encryptedBytesWithIv.size <= IV_SIZE_BYTES) {
-            throw IllegalArgumentException("Invalid encrypted payload size")
-        }
-
-        val inputStream = ByteArrayInputStream(encryptedBytesWithIv)
+    fun decrypt(encryptedPayload: ByteArray): ByteArray {
+        val inputStream = ByteArrayInputStream(encryptedPayload)
         val iv = ByteArray(IV_SIZE_BYTES)
         inputStream.read(iv)
-        val ciphertext = inputStream.readBytes()
+
+        val ciphertext = ByteArray(encryptedPayload.size - IV_SIZE_BYTES)
+        inputStream.read(ciphertext)
 
         val cipher = Cipher.getInstance(TRANSFORMATION)
         val spec = GCMParameterSpec(TAG_LENGTH_BITS, iv)
