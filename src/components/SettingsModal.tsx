@@ -11,7 +11,8 @@ import {
   Check, 
   KeyRound,
   Smartphone,
-  ChevronRight
+  ChevronRight,
+  Code2
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { VaultSettings, ThemeMode, EncryptedVaultEnvelope } from '../types/vault';
@@ -28,6 +29,7 @@ interface SettingsModalProps {
   onOpenInstallGuide?: () => void;
   onOpenBackupRestore?: () => void;
   onOpenGitHubGuide?: () => void;
+  onOpenAndroidSource?: () => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -40,6 +42,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onOpenInstallGuide,
   onOpenBackupRestore,
   onOpenGitHubGuide,
+  onOpenAndroidSource,
 }) => {
   const [confirmWipe, setConfirmWipe] = useState<boolean>(false);
   const [newPin, setNewPin] = useState<string>('');
@@ -148,14 +151,40 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
                 <div>
                   <h4 className="text-xs font-bold text-slate-900 dark:text-white">
-                    Use on Your Phone (No Store Needed)
+                    Use on Your Phone (Install Guide)
                   </h4>
                   <p className="text-[11px] font-medium text-slate-600 dark:text-slate-300">
-                    Scan QR code, 1-tap app install, or sideload APK
+                    Scan QR code, 1-tap web install, or build &amp; sideload APK
                   </p>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+            </div>
+          )}
+
+          {/* Android Studio Source & APK Project */}
+          {onOpenAndroidSource && (
+            <div
+              onClick={() => {
+                onClose();
+                onOpenAndroidSource();
+              }}
+              className="p-3.5 bg-slate-100/90 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-750 rounded-2xl border border-slate-250 dark:border-slate-700 flex items-center justify-between cursor-pointer transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-violet-600 text-white flex items-center justify-center shadow-xs shrink-0">
+                  <Code2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">
+                    Android Studio Project &amp; APK
+                  </h4>
+                  <p className="text-[11px] font-medium text-slate-600 dark:text-slate-300">
+                    Kotlin, Compose, Android KeyStore &amp; download .zip
+                  </p>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-slate-500 shrink-0" />
             </div>
           )}
 

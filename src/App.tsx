@@ -449,9 +449,9 @@ export default function App() {
                 Passward
               </h1>
               <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300">
-                <span>{passwords.length} credentials</span>
+                <span className="text-[10px]">{passwords.length} credentials</span>
                 <span>·</span>
-                <span>Encrypted Vault</span>
+                <span className="text-left text-[10px] leading-[11px]">Encrypted Vault</span>
               </div>
             </div>
 
@@ -719,6 +719,7 @@ export default function App() {
           onOpenInstallGuide={() => setIsInstallGuideOpen(true)}
           onOpenBackupRestore={() => setIsBackupRestoreOpen(true)}
           onOpenGitHubGuide={() => setIsGitHubGuideOpen(true)}
+          onOpenAndroidSource={() => setIsAndroidSourceOpen(true)}
         />
       )}
 
