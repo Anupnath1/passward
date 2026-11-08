@@ -121,23 +121,39 @@ export const PasswordDetailModal: React.FC<PasswordDetailModalProps> = ({
             </p>
           </div>
 
-          {/* Password Card */}
-          <div className="p-3.5 bg-slate-100/80 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700/80">
+          {/* Password Card (Click password to reveal) */}
+          <div 
+            onClick={() => {
+              triggerHaptic('tap');
+              setShowPassword(!showPassword);
+            }}
+            title={showPassword ? 'Click password to hide' : 'Click password to reveal'}
+            className="p-3.5 bg-slate-100/80 dark:bg-slate-800/80 hover:bg-slate-150 dark:hover:bg-slate-750 rounded-2xl border border-slate-200 dark:border-slate-700/80 cursor-pointer transition-colors"
+          >
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                 Password
               </span>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="text-xs text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-semibold flex items-center gap-1"
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    triggerHaptic('tap');
+                    setShowPassword(!showPassword);
+                  }}
+                  className="text-xs text-indigo-700 dark:text-indigo-300 hover:underline font-semibold flex items-center gap-1"
                 >
                   {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                   <span>{showPassword ? 'Hide' : 'Reveal'}</span>
                 </button>
                 <span className="text-slate-400 dark:text-slate-600">·</span>
                 <button
-                  onClick={() => handleCopy(entry.password, 'Password')}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCopy(entry.password, 'Password');
+                  }}
                   className="text-xs text-indigo-700 dark:text-indigo-300 hover:underline flex items-center gap-1 font-semibold"
                 >
                   {copiedField === 'Password' ? (
@@ -155,7 +171,7 @@ export const PasswordDetailModal: React.FC<PasswordDetailModalProps> = ({
               </div>
             </div>
 
-            <p className="text-sm font-mono font-bold text-slate-900 dark:text-white tracking-wider select-all break-all min-h-[20px]">
+            <p className="text-sm font-mono font-bold text-slate-900 dark:text-white tracking-wider select-all break-all min-h-[20px] select-text">
               {showPassword ? entry.password : '••••••••••••••••'}
             </p>
 

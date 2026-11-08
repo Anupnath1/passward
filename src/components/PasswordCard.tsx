@@ -5,7 +5,6 @@ import {
   Mail, 
   Wifi, 
   Landmark, 
-  Key, 
   Copy, 
   Check, 
   Star
@@ -34,24 +33,24 @@ export const getCategoryIcon = (category: PasswordCategory) => {
     case 'financial':
       return <Landmark className="w-4 h-4" />;
     default:
-      return <Key className="w-4 h-4" />;
+      return <Globe className="w-4 h-4" />;
   }
 };
 
 export const getCategoryColor = (category: PasswordCategory) => {
   switch (category) {
     case 'website':
-      return 'bg-blue-100 text-blue-800 dark:bg-blue-950/80 dark:text-blue-300 border border-blue-200 dark:border-blue-900/60';
+      return 'bg-blue-50 text-blue-600 dark:bg-[#14213d] dark:text-blue-400 border border-blue-200 dark:border-blue-500/20';
     case 'app':
-      return 'bg-purple-100 text-purple-800 dark:bg-purple-950/80 dark:text-purple-300 border border-purple-200 dark:border-purple-900/60';
+      return 'bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400 border border-purple-200 dark:border-purple-500/20';
     case 'email':
-      return 'bg-amber-100 text-amber-900 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-200 dark:border-amber-900/60';
+      return 'bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20';
     case 'wifi':
-      return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/60';
+      return 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20';
     case 'financial':
-      return 'bg-rose-100 text-rose-800 dark:bg-rose-950/80 dark:text-rose-300 border border-rose-200 dark:border-rose-900/60';
+      return 'bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20';
     default:
-      return 'bg-slate-200 text-slate-800 dark:bg-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700';
+      return 'bg-blue-50 text-blue-600 dark:bg-[#14213d] dark:text-blue-400 border border-blue-200 dark:border-blue-500/20';
   }
 };
 
@@ -71,6 +70,12 @@ export const PasswordCard: React.FC<PasswordCardProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleCardClick = () => {
+    triggerHaptic('tap');
+    // Directly pop up the PasswordDetailModal on card click without needing to click "Details"
+    onClick();
+  };
+
   return (
     <motion.div
       layout
@@ -79,74 +84,74 @@ export const PasswordCard: React.FC<PasswordCardProps> = ({
       exit={{ opacity: 0, scale: 0.95 }}
       whileHover={{ y: -1 }}
       whileTap={{ scale: 0.99 }}
-      transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-      onClick={onClick}
+      transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+      onClick={handleCardClick}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          onClick();
+          handleCardClick();
         }
       }}
-      className="group w-full p-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-2xl border border-slate-250 dark:border-slate-800 shadow-xs hover:shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-colors duration-150 cursor-pointer flex items-center justify-between gap-3 text-left"
+      className="group w-full p-3 bg-white dark:bg-[#101726] hover:bg-slate-50 dark:hover:bg-[#141d2e] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs hover:shadow-xs transition-colors duration-150 cursor-pointer flex items-center justify-between gap-3 text-left"
     >
-      {/* Left Icon & Service Info */}
-      <div className="flex items-center gap-3 min-w-0 flex-1">
-        <div
-          className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 font-bold text-sm shadow-2xs ${getCategoryColor(
-            entry.category
-          )}`}
-        >
-          {getCategoryIcon(entry.category)}
-        </div>
-
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate tracking-tight">
-              {entry.serviceName}
-            </h4>
-          </div>
-
-          <p className="text-xs text-slate-700 dark:text-slate-200 font-mono truncate mt-0.5 font-medium">
-            {entry.username || 'No username'}
-          </p>
-        </div>
+      {/* Left Icon */}
+      <div
+        className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 font-bold text-sm shadow-2xs ${getCategoryColor(
+          entry.category
+        )}`}
+      >
+        {getCategoryIcon(entry.category)}
       </div>
 
-      {/* Right Controls: Star & Copy Password */}
-      <div className="flex items-center gap-1 shrink-0">
+      {/* Middle: App/Website Name & Gmail/Username (Clean display matching image_a89e4590.png) */}
+      <div className="min-w-0 flex-1">
+        <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate tracking-tight">
+          {entry.serviceName}
+        </h4>
+
+        <p className="text-xs text-blue-600 dark:text-blue-300/90 font-mono truncate mt-0.5 font-medium">
+          {entry.username || 'No username'}
+        </p>
+      </div>
+
+      {/* Right Controls: Star & Sleek Square Copy Button */}
+      <div className="flex items-center gap-1.5 shrink-0">
         <button
-          onClick={onToggleFavorite}
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            triggerHaptic('tap');
+            onToggleFavorite(e);
+          }}
           title={entry.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-          className={`p-2 rounded-xl transition-colors ${
-            entry.isFavorite
-              ? 'text-amber-500 hover:text-amber-600'
-              : 'text-slate-400 dark:text-slate-500 hover:text-amber-500 dark:hover:text-amber-400'
-          }`}
+          className="p-1.5 rounded-xl transition-colors hover:scale-110 active:scale-95"
         >
-          <Star className={`w-4 h-4 ${entry.isFavorite ? 'fill-current' : ''}`} />
+          <Star
+            className={`w-4 h-4 transition-colors ${
+              entry.isFavorite
+                ? 'fill-amber-400 text-amber-400'
+                : 'text-slate-400 dark:text-slate-500 hover:text-amber-400'
+            }`}
+          />
         </button>
 
+        {/* Compact Square Copy Button matching image_a89e4590.png */}
         <button
+          type="button"
           onClick={handleCopy}
           title="Copy Password"
-          className={`min-w-[42px] h-10 px-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all ${
+          className={`w-9 h-9 rounded-2xl flex items-center justify-center transition-all ${
             copied
               ? 'bg-emerald-600 text-white shadow-xs'
-              : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-indigo-100 dark:hover:bg-indigo-950/80 hover:text-indigo-800 dark:hover:text-indigo-200'
+              : 'bg-slate-100 dark:bg-[#1a2333] hover:bg-slate-200 dark:hover:bg-[#223046] text-slate-700 dark:text-slate-300'
           }`}
         >
           {copied ? (
-            <>
-              <Check className="w-3.5 h-3.5" />
-              <span className="text-[11px] hidden xs:inline">Copied</span>
-            </>
+            <Check className="w-4 h-4 text-white" />
           ) : (
-            <>
-              <Copy className="w-3.5 h-3.5" />
-              <span className="text-[11px] hidden xs:inline">Copy</span>
-            </>
+            <Copy className="w-4 h-4 text-slate-400 dark:text-slate-300" />
           )}
         </button>
       </div>

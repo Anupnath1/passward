@@ -1365,7 +1365,7 @@ fun EditPasswordDialog(
     val categories = listOf("website", "app", "email", "wifi", "financial", "other")
 
     fun generateRandomPassword(): String {
-        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*"
+        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#\$%^&*"
         return (1..16).map { chars[Random.nextInt(chars.length)] }.joinToString("")
     }
 
@@ -1651,12 +1651,12 @@ fun BackupRestoreDialog(
                             onClick = {
                                 try {
                                     val sb = StringBuilder()
-                                    sb.append("[\\n")
+                                    sb.append("[\n")
                                     passwords.forEachIndexed { index, p ->
                                         val decrypted = try { cryptoManager.decryptToString(p.encryptedPassword) } catch (_: Exception) { "" }
-                                        sb.append("  {\\"service\\":\\"\${p.serviceName}\\",\\"user\\":\\"\${p.username}\\",\\"pass\\":\\"$decrypted\\",\\"cat\\":\\"\${p.category}\\"}")
+                                        sb.append("  {\"service\":\"\${p.serviceName}\",\"user\":\"\${p.username}\",\"pass\":\"\$decrypted\",\"cat\":\"\${p.category}\"}")
                                         if (index < passwords.size - 1) sb.append(",")
-                                        sb.append("\\n")
+                                        sb.append("\n")
                                     }
                                     sb.append("]")
 
@@ -1705,14 +1705,14 @@ fun BackupRestoreDialog(
                                 onClick = {
                                     try {
                                         var restoredCount = 0
-                                        val pattern = Regex("""\\{"service":"(.*?)","user":"(.*?)","pass":"(.*?)","cat":"(.*?)"\\}""")
+                                        val pattern = Regex("""\{"service":"(.*?)","user":"(.*?)","pass":"(.*?)","cat":"(.*?)"\}""")
                                         pattern.findAll(importText).forEach { match ->
                                             val (svc, user, pass, cat) = match.destructured
                                             onRestoreItem(svc, user, pass, cat)
                                             restoredCount++
                                         }
                                         if (restoredCount > 0) {
-                                            Toast.makeText(context, "Restored $restoredCount passwords!", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, "Restored \$restoredCount passwords!", Toast.LENGTH_SHORT).show()
                                             onDismiss()
                                         } else {
                                             Toast.makeText(context, "No valid records found in JSON", Toast.LENGTH_SHORT).show()
@@ -1780,7 +1780,7 @@ fun SecurityAuditDialog(
 
             val freq = passFrequency[plain] ?: 1
             if (freq > 1) {
-                issue = if (issue != null) "$issue · Reused" else "Reused password ($freq accounts)"
+                issue = if (issue != null) "\$issue · Reused" else "Reused password (\$freq accounts)"
             }
 
             if (issue != null) {
@@ -1843,7 +1843,7 @@ fun SecurityAuditDialog(
                             )
                         }
                         Text(
-                            text = "$healthScore%",
+                            text = "\$healthScore%",
                             fontSize = 28.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = scoreColor
@@ -1858,19 +1858,19 @@ fun SecurityAuditDialog(
                 ) {
                     ElevatedCard(modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp)) {
                         Column(modifier = Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("$strongCount", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF10B981))
+                            Text("\$strongCount", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF10B981))
                             Text("Strong", fontSize = 11.sp, color = MaterialTheme.colorScheme.outline)
                         }
                     }
                     ElevatedCard(modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp)) {
                         Column(modifier = Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("$weakCount", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFFEF4444))
+                            Text("\$weakCount", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFFEF4444))
                             Text("Weak", fontSize = 11.sp, color = MaterialTheme.colorScheme.outline)
                         }
                     }
                     ElevatedCard(modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp)) {
                         Column(modifier = Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("$reusedCount", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFFF59E0B))
+                            Text("\$reusedCount", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFFF59E0B))
                             Text("Reused", fontSize = 11.sp, color = MaterialTheme.colorScheme.outline)
                         }
                     }
@@ -1933,7 +1933,7 @@ fun StandalonePasswordGeneratorDialog(
         val lower = "abcdefghijklmnopqrstuvwxyz"
         val upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         val digits = "0123456789"
-        val symbols = "!@#$%^&*()-_=+[]{}<>?"
+        val symbols = "!@#\$%^&*()-_=+[]{}<>?"
 
         val pool = StringBuilder(lower)
         if (useUppercase) pool.append(upper)
@@ -2032,7 +2032,7 @@ fun StandalonePasswordGeneratorDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Symbols (!@#$)", fontSize = 13.sp)
+                    Text("Symbols (!@#\$)", fontSize = 13.sp)
                     Switch(checked = useSymbols, onCheckedChange = { useSymbols = it; generate() })
                 }
 
@@ -2135,7 +2135,7 @@ fun SettingsDialog(
                 ElevatedCard(shape = RoundedCornerShape(14.dp)) {
                     Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text("Storage Stats", fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                        Text("$totalCredentials encrypted credentials saved locally", fontSize = 12.sp, color = MaterialTheme.colorScheme.outline)
+                        Text("\$totalCredentials encrypted credentials saved locally", fontSize = 12.sp, color = MaterialTheme.colorScheme.outline)
                         Text("Database: SQLite Room (Hardware Keystore Encrypted)", fontSize = 11.sp, color = MaterialTheme.colorScheme.outline)
                     }
                 }
@@ -2183,8 +2183,6 @@ fun PasswordItemCard(
     onDelete: () -> Unit
 ) {
     val context = LocalContext.current
-    var isPasswordVisible by remember { mutableStateOf(false) }
-    var decryptedPassword by remember { mutableStateOf<String?>(null) }
 
     ElevatedCard(
         modifier = Modifier
@@ -2192,116 +2190,84 @@ fun PasswordItemCard(
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp)
     ) {
-        Column(modifier = Modifier.padding(14.dp)) {
+        Column(modifier = Modifier.padding(12.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Left Icon Badge
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFF14213D)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Language,
+                        contentDescription = "Open Details",
+                        tint = Color(0xFF60A5FA),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(10.dp))
+
+                // App/Website Name & Gmail/Username (Only these displayed by default!)
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = item.serviceName,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
+                        fontSize = 15.sp,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = item.username,
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.outline
+                        text = item.username.ifBlank { "No username" },
+                        fontSize = 12.sp,
+                        color = Color(0xFF93C5FD),
+                        fontFamily = FontFamily.Monospace
                     )
                 }
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Favorite star
-                    IconButton(onClick = onToggleFavorite, modifier = Modifier.size(34.dp)) {
+                // Right Controls: Star & Sleek Square Copy Button
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    IconButton(
+                        onClick = onToggleFavorite,
+                        modifier = Modifier.size(34.dp)
+                    ) {
                         Icon(
                             imageVector = if (item.isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
                             contentDescription = "Favorite",
-                            tint = if (item.isFavorite) Color(0xFFF59E0B) else MaterialTheme.colorScheme.outline
+                            tint = if (item.isFavorite) Color(0xFFF59E0B) else MaterialTheme.colorScheme.outline,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
-                    // Edit Button
-                    IconButton(onClick = onEdit, modifier = Modifier.size(34.dp)) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit",
-                            tint = Color(0xFF6366F1),
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                    // Delete Button
-                    IconButton(onClick = onDelete, modifier = Modifier.size(34.dp)) {
-                        Icon(
-                            imageVector = Icons.Default.DeleteOutline,
-                            contentDescription = "Delete",
-                            tint = MaterialTheme.colorScheme.outline,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                }
-            }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Password row
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = if (isPasswordVisible) (decryptedPassword ?: "••••••••") else "••••••••",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Row {
-                    IconButton(
-                        onClick = {
-                            if (!isPasswordVisible && decryptedPassword == null) {
+                    // Compact Square Copy Button (Matching Screenshot)
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .clickable {
                                 try {
-                                    decryptedPassword = cryptoManager.decryptToString(item.encryptedPassword)
+                                    val pwd = cryptoManager.decryptToString(item.encryptedPassword)
+                                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                    val clip = ClipData.newPlainText("password", pwd)
+                                    clipboard.setPrimaryClip(clip)
+                                    Toast.makeText(context, "Password copied to clipboard", Toast.LENGTH_SHORT).show()
                                 } catch (_: Exception) {
-                                    decryptedPassword = "Error decrypting"
+                                    Toast.makeText(context, "Failed to copy", Toast.LENGTH_SHORT).show()
                                 }
-                            }
-                            isPasswordVisible = !isPasswordVisible
-                        },
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = if (isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = "Toggle visibility",
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(6.dp))
-
-                    IconButton(
-                        onClick = {
-                            try {
-                                val pwd = decryptedPassword ?: cryptoManager.decryptToString(item.encryptedPassword)
-                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                val clip = ClipData.newPlainText("password", pwd)
-                                clipboard.setPrimaryClip(clip)
-                                Toast.makeText(context, "Password copied to clipboard", Toast.LENGTH_SHORT).show()
-                            } catch (_: Exception) {
-                                Toast.makeText(context, "Failed to copy", Toast.LENGTH_SHORT).show()
-                            }
-                        },
-                        modifier = Modifier.size(32.dp)
+                            },
+                        contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.ContentCopy,
                             contentDescription = "Copy Password",
-                            modifier = Modifier.size(18.dp)
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(17.dp)
                         )
                     }
                 }
@@ -2328,7 +2294,7 @@ fun AddPasswordDialog(
     val categories = listOf("website", "app", "email", "wifi", "financial", "other")
 
     fun generateRandomPassword(): String {
-        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*"
+        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#\$%^&*"
         return (1..16).map { chars[Random.nextInt(chars.length)] }.joinToString("")
     }
 

@@ -716,21 +716,21 @@ export default function App() {
             </button>
           </div>
 
-          {/* Search Input Bar with Favorites Filter */}
+          {/* Search Input Bar with Compact Favorites Filter (Matching Screenshot) */}
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
-              <Search className="w-4 h-4 text-slate-500 dark:text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Search services, usernames, notes..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-10 pl-9 pr-8 bg-slate-100 dark:bg-slate-800 border-none rounded-xl text-xs font-semibold text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full h-9 pl-9 pr-8 bg-slate-100 dark:bg-[#162032] border border-slate-250 dark:border-slate-800 rounded-2xl text-xs font-normal text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-white"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -743,14 +743,13 @@ export default function App() {
                 setShowFavoritesOnly(!showFavoritesOnly);
               }}
               title={showFavoritesOnly ? 'Show all credentials' : 'Show starred favorites only'}
-              className={`h-10 px-3 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors shrink-0 ${
+              className={`w-9 h-9 rounded-2xl border flex items-center justify-center transition-colors shrink-0 ${
                 showFavoritesOnly
-                  ? 'bg-amber-500 text-white shadow-xs'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-slate-700'
+                  ? 'bg-amber-500/15 border-amber-500/40 text-amber-400'
+                  : 'bg-slate-100 dark:bg-[#162032] border-slate-250 dark:border-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
               }`}
             >
-              <Star className={`w-3.5 h-3.5 ${showFavoritesOnly ? 'fill-current' : ''}`} />
-              <span className="hidden xs:inline">Favorites</span>
+              <Star className={`w-4 h-4 ${showFavoritesOnly ? 'fill-current text-amber-400' : ''}`} />
             </button>
           </div>
         </div>
