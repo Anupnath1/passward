@@ -75,8 +75,8 @@ export const PasswordDetailModal: React.FC<PasswordDetailModalProps> = ({
               <h3 className="text-base font-bold text-slate-900 dark:text-white truncate">
                 {entry.serviceName}
               </h3>
-              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 capitalize">
-                {entry.category}
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                Offline Credential
               </p>
             </div>
           </div>

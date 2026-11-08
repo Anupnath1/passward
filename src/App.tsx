@@ -13,7 +13,11 @@ import {
   ShieldAlert, 
   Settings as SettingsIcon,
   Code2,
-  FolderArchive
+  FolderArchive,
+  Menu,
+  Smartphone,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -66,8 +70,31 @@ export default function App() {
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedCategory, setSelectedCategory] = useState<PasswordCategory | 'all'>('all');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState<boolean>(false);
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close menu on click outside or escape key
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsMenuOpen(false);
+      }
+    };
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isMenuOpen]);
 
   // Modal Dialogs
   const [isSetupOpen, setIsSetupOpen] = useState<boolean>(false);
@@ -173,6 +200,7 @@ export default function App() {
     setIsGeneratorOpen(false);
     setIsAuditOpen(false);
     setIsSettingsOpen(false);
+    setIsMenuOpen(false);
   };
 
   // Unlock Vault
@@ -340,10 +368,6 @@ export default function App() {
   const filteredEntries = useMemo(() => {
     return passwords
       .filter((entry) => {
-        // Category filter
-        if (selectedCategory !== 'all' && entry.category !== selectedCategory) {
-          return false;
-        }
         // Favorite filter
         if (showFavoritesOnly && !entry.isFavorite) {
           return false;
@@ -365,18 +389,7 @@ export default function App() {
         if (!a.isFavorite && b.isFavorite) return 1;
         return a.serviceName.localeCompare(b.serviceName);
       });
-  }, [passwords, selectedCategory, showFavoritesOnly, searchQuery]);
-
-  // Categories list
-  const categoryTabs: { key: PasswordCategory | 'all'; label: string }[] = [
-    { key: 'all', label: 'All' },
-    { key: 'website', label: 'Websites' },
-    { key: 'app', label: 'Apps' },
-    { key: 'email', label: 'Emails' },
-    { key: 'wifi', label: 'Wi-Fi' },
-    { key: 'financial', label: 'Finance' },
-    { key: 'other', label: 'Other' },
-  ];
+  }, [passwords, showFavoritesOnly, searchQuery]);
 
   return (
     <AndroidFrame
@@ -442,134 +455,302 @@ export default function App() {
       <div className="flex-1 flex flex-col h-full bg-slate-50 dark:bg-slate-950 overflow-hidden">
         
         {/* Top App Header */}
-        <div className="px-4 pt-3 pb-2 bg-white dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800 shrink-0">
-          <div className="flex items-center justify-between gap-3 mb-2.5">
-            <div>
-              <h1 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-                Passward
-              </h1>
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300">
-                <span className="text-[10px]">{passwords.length} credentials</span>
-                <span>·</span>
-                <span className="text-left text-[10px] leading-[11px]">Encrypted Vault</span>
+        <div className="px-4 pt-3.5 pb-3 bg-white dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800 shrink-0">
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <div className="flex items-center gap-3 min-w-0">
+              {/* Three-line Hamburger Menu (☰) in Top-Left Corner */}
+              <div className="relative shrink-0">
+                <button
+                  onClick={() => {
+                    triggerHaptic('tap');
+                    setIsMenuOpen((prev) => !prev);
+                  }}
+                  aria-label="Navigation & features menu"
+                  title="Menu (☰)"
+                  className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 flex items-center justify-center text-slate-800 dark:text-slate-100 transition-all border border-slate-200 dark:border-slate-700/60 shadow-xs"
+                >
+                  <Menu className="w-5 h-5 stroke-[2.2]" />
+                </button>
+
+                {/* Dropdown Menu */}
+                <AnimatePresence>
+                  {isMenuOpen && (
+                    <>
+                      {/* Click outside backdrop */}
+                      <div 
+                        className="fixed inset-0 z-40 bg-slate-950/30 dark:bg-black/50 backdrop-blur-2xs" 
+                        onClick={() => setIsMenuOpen(false)}
+                      />
+
+                      <motion.div
+                        ref={menuRef}
+                        initial={{ opacity: 0, scale: 0.95, y: -6 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -6 }}
+                        transition={{ duration: 0.16, ease: 'easeOut' }}
+                        className="absolute top-12 left-0 z-50 w-72 sm:w-80 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col divide-y divide-slate-100 dark:divide-slate-800/80"
+                      >
+                        {/* Menu Header */}
+                        <div className="px-4 py-3 bg-slate-50/90 dark:bg-slate-850/90 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs font-black shadow-xs">
+                              P
+                            </div>
+                            <div>
+                              <div className="text-xs font-bold text-slate-900 dark:text-white">Passward Menu</div>
+                              <div className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">100% Offline · AES-256</div>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => setIsMenuOpen(false)}
+                            aria-label="Close menu"
+                            className="w-7 h-7 rounded-full bg-slate-200/70 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-colors"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+
+                        {/* Section 1: Vault Tools */}
+                        <div className="p-2 space-y-0.5">
+                          <div className="px-2.5 py-1 text-[10px] font-extrabold tracking-wider uppercase text-slate-400 dark:text-slate-500">
+                            Vault Tools
+                          </div>
+
+                          <button
+                            onClick={() => {
+                              triggerHaptic('tap');
+                              setIsMenuOpen(false);
+                              setIsBackupRestoreOpen(true);
+                            }}
+                            className="w-full px-3 py-2 rounded-xl text-left hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3 transition-colors group"
+                          >
+                            <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                              <FolderArchive className="w-4 h-4" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="text-xs font-bold text-slate-900 dark:text-white">Backup & Restore</div>
+                              <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">Export or import encrypted vault</div>
+                            </div>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              triggerHaptic('tap');
+                              setIsMenuOpen(false);
+                              setIsAuditOpen(true);
+                            }}
+                            className="w-full px-3 py-2 rounded-xl text-left hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3 transition-colors group"
+                          >
+                            <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                              <ShieldCheck className="w-4 h-4" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="text-xs font-bold text-slate-900 dark:text-white">Security Health Audit</div>
+                              <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">Vulnerability score & weak password check</div>
+                            </div>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              triggerHaptic('tap');
+                              setIsMenuOpen(false);
+                              setIsGeneratorOpen(true);
+                            }}
+                            className="w-full px-3 py-2 rounded-xl text-left hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3 transition-colors group"
+                          >
+                            <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                              <Sparkles className="w-4 h-4" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="text-xs font-bold text-slate-900 dark:text-white">Password Generator</div>
+                              <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">Create strong passwords with entropy meter</div>
+                            </div>
+                          </button>
+                        </div>
+
+                        {/* Section 2: Mobile & Source */}
+                        <div className="p-2 space-y-0.5">
+                          <div className="px-2.5 py-1 text-[10px] font-extrabold tracking-wider uppercase text-slate-400 dark:text-slate-500">
+                            Android Phone & Code
+                          </div>
+
+                          <button
+                            onClick={() => {
+                              triggerHaptic('tap');
+                              setIsMenuOpen(false);
+                              setIsInstallGuideOpen(true);
+                            }}
+                            className="w-full px-3 py-2 rounded-xl text-left hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3 transition-colors group"
+                          >
+                            <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                              <Smartphone className="w-4 h-4" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="text-xs font-bold text-slate-900 dark:text-white">Install on Phone / APK</div>
+                              <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">Direct install, sideload APK, QR code</div>
+                            </div>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              triggerHaptic('tap');
+                              setIsMenuOpen(false);
+                              setIsAndroidSourceOpen(true);
+                            }}
+                            className="w-full px-3 py-2 rounded-xl text-left hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3 transition-colors group"
+                          >
+                            <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                              <Code2 className="w-4 h-4" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="text-xs font-bold text-slate-900 dark:text-white">Android Studio Source</div>
+                              <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">Export complete Kotlin .ZIP project</div>
+                            </div>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              triggerHaptic('tap');
+                              setIsMenuOpen(false);
+                              setIsGitHubGuideOpen(true);
+                            }}
+                            className="w-full px-3 py-2 rounded-xl text-left hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3 transition-colors group"
+                          >
+                            <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                              <SlidersHorizontal className="w-4 h-4" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="text-xs font-bold text-slate-900 dark:text-white">GitHub Actions & Releases</div>
+                              <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">Automated APK compilation guide</div>
+                            </div>
+                          </button>
+                        </div>
+
+                        {/* Section 3: Settings & Lock */}
+                        <div className="p-2 space-y-0.5">
+                          <button
+                            onClick={() => {
+                              triggerHaptic('tap');
+                              const next: ThemeMode = settings.theme === 'dark' ? 'light' : 'dark';
+                              setSettings((prev) => {
+                                const updated: VaultSettings = { ...prev, theme: next };
+                                saveSettings(updated);
+                                return updated;
+                              });
+                            }}
+                            className="w-full px-3 py-2 rounded-xl text-left hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between transition-colors group"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center shrink-0">
+                                {settings.theme === 'dark' ? <Moon className="w-4 h-4 text-indigo-400" /> : <Sun className="w-4 h-4 text-amber-500" />}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="text-xs font-bold text-slate-900 dark:text-white">Theme Mode</div>
+                                <div className="text-[10px] text-slate-500 dark:text-slate-400 capitalize">{settings.theme} theme</div>
+                              </div>
+                            </div>
+                            <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60">
+                              Switch
+                            </span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              triggerHaptic('tap');
+                              setIsMenuOpen(false);
+                              setIsSettingsOpen(true);
+                            }}
+                            className="w-full px-3 py-2 rounded-xl text-left hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3 transition-colors group"
+                          >
+                            <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                              <SettingsIcon className="w-4 h-4" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="text-xs font-bold text-slate-900 dark:text-white">Vault Settings</div>
+                              <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">Security specs, auto-lock timeout, wipe</div>
+                            </div>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setIsMenuOpen(false);
+                              lockVault();
+                            }}
+                            className="w-full px-3 py-2 rounded-xl text-left bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-950/70 border border-amber-200/80 dark:border-amber-800/60 flex items-center gap-3 transition-colors group mt-1"
+                          >
+                            <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                              <Lock className="w-4 h-4" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="text-xs font-bold text-amber-900 dark:text-amber-200">Lock Vault Now</div>
+                              <div className="text-[10px] text-amber-700 dark:text-amber-300 truncate">Instantly wipe memory & require PIN/biometrics</div>
+                            </div>
+                          </button>
+                        </div>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Prominent Password Heading & Subtitle */}
+              <div className="min-w-0">
+                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none truncate">
+                  Passward
+                </h1>
+                <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 mt-1">
+                  <span>{passwords.length} credentials</span>
+                  <span>·</span>
+                  <span>Encrypted Vault</span>
+                </div>
               </div>
             </div>
 
-            {/* Quick Action Icons */}
-            <div className="flex items-center gap-1">
-              {/* Backup & Restore Center */}
-              <button
-                onClick={() => {
-                  triggerHaptic('tap');
-                  setIsBackupRestoreOpen(true);
-                }}
-                title="Backup & Restore Passwords"
-                className="p-2 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
-              >
-                <FolderArchive className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-              </button>
+            {/* Clean Minimal Right Side: Quick Lock Button */}
+            <button
+              onClick={lockVault}
+              title="Lock Vault Now"
+              className="w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200/80 dark:border-amber-800/60 text-amber-700 dark:text-amber-300 flex items-center justify-center transition-colors shrink-0 shadow-xs"
+            >
+              <Lock className="w-4 h-4" />
+            </button>
+          </div>
 
-              {/* Security Health Audit */}
-              <button
-                onClick={() => {
-                  triggerHaptic('tap');
-                  setIsAuditOpen(true);
-                }}
-                title="Vault Security Audit"
-                className="p-2 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
-              >
-                <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              </button>
-
-              {/* Password Generator */}
-              <button
-                onClick={() => {
-                  triggerHaptic('tap');
-                  setIsGeneratorOpen(true);
-                }}
-                title="Open Password Generator"
-                className="p-2 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
-              >
-                <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-              </button>
-
-              {/* Settings */}
-              <button
-                onClick={() => {
-                  triggerHaptic('tap');
-                  setIsSettingsOpen(true);
-                }}
-                title="Settings"
-                className="p-2 text-slate-700 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
-              >
-                <SettingsIcon className="w-4 h-4" />
-              </button>
-
-              {/* Lock Button */}
-              <button
-                onClick={lockVault}
-                title="Lock Vault Now"
-                className="p-2 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-950/60 rounded-xl transition-colors"
-              >
-                <Lock className="w-4 h-4" />
-              </button>
+          {/* Search Input Bar with Favorites Filter */}
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-slate-500 dark:text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search services, usernames, notes..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full h-10 pl-9 pr-8 bg-slate-100 dark:bg-slate-800 border-none rounded-xl text-xs font-semibold text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
-          </div>
 
-          {/* Search Input Bar */}
-          <div className="relative">
-            <Search className="w-4 h-4 text-slate-500 dark:text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search services, emails, apps, notes..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-10 pl-9 pr-8 bg-slate-100 dark:bg-slate-800 border-none rounded-xl text-xs font-semibold text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-
-          {/* Horizontal Category Tabs */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pt-2 pb-1 no-scrollbar text-xs">
-            {categoryTabs.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => {
-                  triggerHaptic('tap');
-                  setSelectedCategory(tab.key);
-                }}
-                className={`relative px-3 py-1.5 rounded-lg whitespace-nowrap shrink-0 transition-colors font-bold ${
-                  selectedCategory === tab.key
-                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
-                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-
-            {/* Favorite Filter Toggle */}
             <button
               onClick={() => {
                 triggerHaptic('tap');
                 setShowFavoritesOnly(!showFavoritesOnly);
               }}
-              title="Show Favorites"
-              className={`px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0 flex items-center gap-1 transition-colors font-bold ${
+              title={showFavoritesOnly ? 'Show all credentials' : 'Show starred favorites only'}
+              className={`h-10 px-3 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors shrink-0 ${
                 showFavoritesOnly
-                  ? 'bg-amber-500 text-white'
-                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white'
+                  ? 'bg-amber-500 text-white shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-slate-700'
               }`}
             >
               <Star className={`w-3.5 h-3.5 ${showFavoritesOnly ? 'fill-current' : ''}`} />
-              <span>Starred</span>
+              <span className="hidden xs:inline">Favorites</span>
             </button>
           </div>
         </div>
@@ -603,7 +784,7 @@ export default function App() {
                   <Key className="w-6 h-6" />
                 </div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                  {searchQuery || selectedCategory !== 'all' || showFavoritesOnly
+                  {searchQuery || showFavoritesOnly
                     ? 'No matching passwords found'
                     : 'Your personal vault is empty'}
                 </h3>
@@ -612,16 +793,15 @@ export default function App() {
                     ? 'Try a different search keyword or clear filters'
                     : 'Tap the + button below to securely store your first password'}
                 </p>
-                {searchQuery && (
+                {(searchQuery || showFavoritesOnly) && (
                   <button
                     onClick={() => {
                       setSearchQuery('');
-                      setSelectedCategory('all');
                       setShowFavoritesOnly(false);
                     }}
                     className="mt-3 px-3.5 py-1.5 text-xs font-bold text-indigo-700 dark:text-indigo-300 hover:underline bg-indigo-50 dark:bg-indigo-950/60 rounded-lg"
                   >
-                    Clear all filters
+                    Clear filters
                   </button>
                 )}
               </motion.div>

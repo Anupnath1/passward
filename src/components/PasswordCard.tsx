@@ -106,9 +106,6 @@ export const PasswordCard: React.FC<PasswordCardProps> = ({
             <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate tracking-tight">
               {entry.serviceName}
             </h4>
-            <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 capitalize hidden sm:inline">
-              · {entry.category}
-            </span>
           </div>
 
           <p className="text-xs text-slate-700 dark:text-slate-200 font-mono truncate mt-0.5 font-medium">

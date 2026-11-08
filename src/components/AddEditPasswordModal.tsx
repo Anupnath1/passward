@@ -6,13 +6,7 @@ import {
   Sparkles, 
   RefreshCw, 
   ShieldCheck, 
-  Star, 
-  Globe, 
-  Smartphone, 
-  Mail, 
-  Wifi, 
-  Landmark, 
-  Key 
+  Star 
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { PasswordEntry, PasswordCategory } from '../types/vault';
@@ -86,15 +80,6 @@ export const AddEditPasswordModal: React.FC<AddEditPasswordModalProps> = ({
     });
   };
 
-  const categories: { key: PasswordCategory; label: string; icon: React.ReactNode }[] = [
-    { key: 'website', label: 'Website', icon: <Globe className="w-3.5 h-3.5" /> },
-    { key: 'app', label: 'App', icon: <Smartphone className="w-3.5 h-3.5" /> },
-    { key: 'email', label: 'Email', icon: <Mail className="w-3.5 h-3.5" /> },
-    { key: 'wifi', label: 'Wi-Fi', icon: <Wifi className="w-3.5 h-3.5" /> },
-    { key: 'financial', label: 'Finance', icon: <Landmark className="w-3.5 h-3.5" /> },
-    { key: 'other', label: 'Other', icon: <Key className="w-3.5 h-3.5" /> },
-  ];
-
   return (
     <div className="absolute inset-0 z-40 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 select-none">
       <motion.div
@@ -158,33 +143,6 @@ export const AddEditPasswordModal: React.FC<AddEditPasswordModalProps> = ({
               }}
               className="w-full h-11 px-3.5 bg-slate-100/80 dark:bg-slate-800/90 border border-slate-300 dark:border-slate-700 rounded-xl text-sm font-semibold text-slate-950 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
-          </div>
-
-          {/* Category Selector Tabs */}
-          <div>
-            <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
-              Category
-            </label>
-            <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl">
-              {categories.map((cat) => (
-                <button
-                  key={cat.key}
-                  type="button"
-                  onClick={() => {
-                    triggerHaptic('tap');
-                    setCategory(cat.key);
-                  }}
-                  className={`h-8 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
-                    category === cat.key
-                      ? 'bg-indigo-600 text-white shadow-xs'
-                      : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  {cat.icon}
-                  <span className="truncate">{cat.label}</span>
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* Username / Email */}

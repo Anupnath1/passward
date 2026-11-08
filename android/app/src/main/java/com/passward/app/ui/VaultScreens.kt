@@ -53,8 +53,8 @@ fun VaultApp(
 
     val passwordsFlow by passwordDao.getAllPasswords().collectAsState(initial = emptyList())
     var searchQuery by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf("all") }
     var showFavoritesOnly by remember { mutableStateOf(false) }
+    var showMenuDropdown by remember { mutableStateOf(false) }
 
     // Dialog States
     var showBackupDialog by remember { mutableStateOf(false) }
@@ -121,89 +121,120 @@ fun VaultApp(
         }
     } else {
         // Vault Dashboard Screen
-        val categories = listOf("all", "website", "app", "email", "wifi", "financial", "other")
-        val filteredPasswords = remember(passwordsFlow, searchQuery, selectedCategory, showFavoritesOnly) {
+        val filteredPasswords = remember(passwordsFlow, searchQuery, showFavoritesOnly) {
             passwordsFlow.filter { item ->
-                val matchesCategory = selectedCategory == "all" || item.category == selectedCategory
                 val matchesFavorite = !showFavoritesOnly || item.isFavorite
                 val matchesSearch = searchQuery.isBlank() ||
                         item.serviceName.contains(searchQuery, ignoreCase = true) ||
                         item.username.contains(searchQuery, ignoreCase = true) ||
                         item.url.contains(searchQuery, ignoreCase = true)
-                matchesCategory && matchesFavorite && matchesSearch
+                matchesFavorite && matchesSearch
             }
         }
 
         Scaffold(
             topBar = {
                 TopAppBar(
+                    navigationIcon = {
+                        Box {
+                            IconButton(onClick = { showMenuDropdown = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.Menu,
+                                    contentDescription = "Menu (☰)",
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+
+                            DropdownMenu(
+                                expanded = showMenuDropdown,
+                                onDismissRequest = { showMenuDropdown = false },
+                                modifier = Modifier.width(260.dp)
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Backup & Restore", fontWeight = FontWeight.SemiBold) },
+                                    leadingIcon = {
+                                        Icon(Icons.Default.Folder, contentDescription = null, tint = Color(0xFF6366F1))
+                                    },
+                                    onClick = {
+                                        showMenuDropdown = false
+                                        showBackupDialog = true
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Security Health Audit", fontWeight = FontWeight.SemiBold) },
+                                    leadingIcon = {
+                                        Icon(Icons.Default.Security, contentDescription = null, tint = Color(0xFF10B981))
+                                    },
+                                    onClick = {
+                                        showMenuDropdown = false
+                                        showAuditDialog = true
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Password Generator", fontWeight = FontWeight.SemiBold) },
+                                    leadingIcon = {
+                                        Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFF818CF8))
+                                    },
+                                    onClick = {
+                                        showMenuDropdown = false
+                                        showGeneratorDialog = true
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(if (isDarkTheme) "Switch to Light Theme" else "Switch to Dark Theme", fontWeight = FontWeight.SemiBold) },
+                                    leadingIcon = {
+                                        Icon(
+                                            if (isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
+                                            contentDescription = null,
+                                            tint = if (isDarkTheme) Color(0xFFFBBF24) else Color(0xFF6366F1)
+                                        )
+                                    },
+                                    onClick = {
+                                        showMenuDropdown = false
+                                        onToggleTheme()
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Vault Settings", fontWeight = FontWeight.SemiBold) },
+                                    leadingIcon = {
+                                        Icon(Icons.Default.Settings, contentDescription = null)
+                                    },
+                                    onClick = {
+                                        showMenuDropdown = false
+                                        showSettingsDialog = true
+                                    }
+                                )
+                                HorizontalDivider()
+                                DropdownMenuItem(
+                                    text = { Text("Lock Vault Now", fontWeight = FontWeight.Bold, color = Color(0xFFF59E0B)) },
+                                    leadingIcon = {
+                                        Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFFF59E0B))
+                                    },
+                                    onClick = {
+                                        showMenuDropdown = false
+                                        onLockVault()
+                                    }
+                                )
+                            }
+                        }
+                    },
                     title = {
                         Column {
-                            Text("Passward", fontWeight = FontWeight.Bold, fontSize = 17.sp)
+                            Text("Passward", fontWeight = FontWeight.Black, fontSize = 22.sp, letterSpacing = (-0.5).sp)
                             Text(
-                                "${passwordsFlow.size} credentials",
-                                fontSize = 11.sp,
+                                "${passwordsFlow.size} credentials · Encrypted Vault",
+                                fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.outline
                             )
                         }
                     },
                     actions = {
-                        // Light / Dark Theme Toggle
-                        IconButton(onClick = onToggleTheme) {
-                            Icon(
-                                imageVector = if (isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
-                                contentDescription = "Toggle Theme",
-                                tint = if (isDarkTheme) Color(0xFFFBBF24) else Color(0xFF6366F1),
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-
-                        // 1. Backup & Restore Icon (FolderArchive)
-                        IconButton(onClick = { showBackupDialog = true }) {
-                            Icon(
-                                imageVector = Icons.Default.Folder,
-                                contentDescription = "Backup & Restore",
-                                tint = Color(0xFF6366F1), // Indigo
-                                modifier = Modifier.size(22.dp)
-                            )
-                        }
-
-                        // 2. Security Health Audit Icon (ShieldCheck)
-                        IconButton(onClick = { showAuditDialog = true }) {
-                            Icon(
-                                imageVector = Icons.Default.Security,
-                                contentDescription = "Security Audit",
-                                tint = Color(0xFF10B981), // Emerald
-                                modifier = Modifier.size(22.dp)
-                            )
-                        }
-
-                        // 3. Password Generator Icon (Sparkles)
-                        IconButton(onClick = { showGeneratorDialog = true }) {
-                            Icon(
-                                imageVector = Icons.Default.AutoAwesome,
-                                contentDescription = "Password Generator",
-                                tint = Color(0xFF818CF8), // Purple/Sparkle
-                                modifier = Modifier.size(22.dp)
-                            )
-                        }
-
-                        // 4. Settings Icon (Gear)
-                        IconButton(onClick = { showSettingsDialog = true }) {
-                            Icon(
-                                imageVector = Icons.Default.Settings,
-                                contentDescription = "Settings",
-                                tint = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.size(22.dp)
-                            )
-                        }
-
-                        // 5. Quick Lock
+                        // Quick Lock Button
                         IconButton(onClick = onLockVault) {
                             Icon(
                                 imageVector = Icons.Default.Lock,
                                 contentDescription = "Lock Now",
-                                tint = Color(0xFFF59E0B), // Amber
+                                tint = Color(0xFFF59E0B),
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -226,52 +257,41 @@ fun VaultApp(
                     .padding(padding)
                     .padding(horizontal = 16.dp)
             ) {
-                // Search Input Bar
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    placeholder = { Text("Search services, emails, apps...") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                    trailingIcon = {
-                        if (searchQuery.isNotEmpty()) {
-                            IconButton(onClick = { searchQuery = "" }) {
-                                Icon(Icons.Default.Clear, contentDescription = "Clear")
-                            }
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 6.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    singleLine = true
-                )
-
-                // Category Chips and Favorite Toggle
+                // Search Input Bar & Favorite Filter
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp),
+                        .padding(vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        items(categories) { cat ->
-                            FilterChip(
-                                selected = selectedCategory == cat,
-                                onClick = { selectedCategory = cat },
-                                label = { Text(cat.replaceFirstChar { it.uppercase() }) },
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                        }
-                    }
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        placeholder = { Text("Search services, usernames, notes...") },
+                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                        trailingIcon = {
+                            if (searchQuery.isNotEmpty()) {
+                                IconButton(onClick = { searchQuery = "" }) {
+                                    Icon(Icons.Default.Clear, contentDescription = "Clear")
+                                }
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(16.dp),
+                        singleLine = true
+                    )
 
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
 
                     IconButton(
                         onClick = { showFavoritesOnly = !showFavoritesOnly },
-                        modifier = Modifier.size(36.dp)
+                        modifier = Modifier
+                            .size(52.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(
+                                if (showFavoritesOnly) Color(0xFFF59E0B).copy(alpha = 0.15f)
+                                else MaterialTheme.colorScheme.surfaceVariant
+                            )
                     ) {
                         Icon(
                             imageVector = if (showFavoritesOnly) Icons.Default.Star else Icons.Default.StarBorder,
@@ -594,17 +614,6 @@ fun EditPasswordDialog(
                     }
                 )
 
-                Text("Category:", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    items(categories) { cat ->
-                        FilterChip(
-                            selected = category == cat,
-                            onClick = { category = cat },
-                            label = { Text(cat.replaceFirstChar { it.uppercase() }, fontSize = 11.sp) }
-                        )
-                    }
-                }
-
                 OutlinedTextField(
                     value = url,
                     onValueChange = { url = it },
@@ -667,7 +676,7 @@ fun PasswordDetailDialog(
             ) {
                 Column {
                     Text(item.serviceName, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Text(item.category.uppercase(), fontSize = 11.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                    Text("OFFLINE CREDENTIAL", fontSize = 11.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 }
                 IconButton(onClick = onEdit) {
                     Icon(Icons.Default.Edit, contentDescription = "Edit Password", tint = Color(0xFF6366F1))
@@ -1382,19 +1391,12 @@ fun PasswordItemCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text(
-                            text = item.serviceName,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        SuggestionChip(
-                            onClick = {},
-                            label = { Text(item.category, fontSize = 10.sp) },
-                            modifier = Modifier.height(24.dp)
-                        )
-                    }
+                    Text(
+                        text = item.serviceName,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                     Text(
                         text = item.username,
                         fontSize = 13.sp,
@@ -1569,17 +1571,6 @@ fun AddPasswordDialog(
                         }
                     }
                 )
-
-                Text("Category:", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    items(categories) { cat ->
-                        FilterChip(
-                            selected = category == cat,
-                            onClick = { category = cat },
-                            label = { Text(cat.replaceFirstChar { it.uppercase() }, fontSize = 11.sp) }
-                        )
-                    }
-                }
 
                 OutlinedTextField(
                     value = url,
