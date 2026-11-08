@@ -76,6 +76,9 @@ on:
       - 'v*' # Triggers whenever you push a version tag like v1.0.1, v1.1.0
   workflow_dispatch: # Allows manual one-click trigger from GitHub Actions tab
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -88,12 +91,33 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: 'gradle'
 
-      - name: Grant Execute Permission to Gradlew
-        run: chmod +x gradlew
+      - name: Check for Android Project Files
+        run: |
+          if [ ! -d "app" ]; then
+            echo "::error title=Missing Android Source Code::The 'app' folder was not found in your repository! Please upload the extracted Android project files (including 'app', 'gradlew', and 'build.gradle.kts') to this repository."
+            exit 1
+          fi
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug
+        run: |
+          if [ -f "./gradlew" ]; then
+            chmod +x gradlew
+            ./gradlew assembleDebug --no-daemon --stacktrace
+          else
+            gradle assembleDebug --no-daemon --stacktrace
+          fi
+
+      - name: Upload APK as Artifact (Direct Download to Laptop)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Passward-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
 
       - name: Create GitHub Release & Upload APK
         uses: softprops/action-gh-release@v2
@@ -324,6 +348,19 @@ git push -u origin main`}
                 </p>
                 <p className="text-[11px] leading-relaxed">
                   Run <code className="bg-indigo-100 dark:bg-indigo-900 px-1 py-0.5 rounded font-mono font-bold">git tag v1.0.1 && git push origin v1.0.1</code>. GitHub will build the APK and place it under your repository's <strong>Releases</strong> tab in ~2 minutes!
+                </p>
+              </div>
+
+              {/* Troubleshooting: Missing APK in Assets */}
+              <div className="p-3.5 bg-amber-50 dark:bg-amber-950/40 rounded-2xl border border-amber-200 dark:border-amber-800/70 text-xs text-amber-950 dark:text-amber-200 space-y-1.5">
+                <p className="font-bold flex items-center gap-1.5 text-amber-900 dark:text-amber-300">
+                  <HelpCircle className="w-4 h-4 shrink-0" />
+                  <span>Only seeing "Source code (zip)" and NO APK?</span>
+                </p>
+                <p className="text-[11px] leading-relaxed text-amber-900 dark:text-amber-200">
+                  1. In your GitHub repository, go to <strong>Settings &gt; Actions &gt; General</strong>.<br />
+                  2. Scroll down to <strong>Workflow permissions</strong> and select <strong>"Read and write permissions"</strong>, then click <strong>Save</strong>.<br />
+                  3. Make sure the file <code className="font-mono font-bold">.github/workflows/build-apk.yml</code> exists in your repository branch. Click your repo's <strong>Actions</strong> tab to see build progress or download the APK directly from <strong>Artifacts</strong>!
                 </p>
               </div>
             </div>

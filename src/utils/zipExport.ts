@@ -48,6 +48,9 @@ on:
       - 'v*'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -60,12 +63,33 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: 'gradle'
 
-      - name: Grant Execute Permission to Gradlew
-        run: chmod +x gradlew
+      - name: Check for Android Project Files
+        run: |
+          if [ ! -d "app" ]; then
+            echo "::error title=Missing Android Source Code::The 'app' folder was not found in your repository! Please upload the extracted Android project files (including 'app', 'gradlew', and 'build.gradle.kts') to this repository."
+            exit 1
+          fi
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug
+        run: |
+          if [ -f "./gradlew" ]; then
+            chmod +x gradlew
+            ./gradlew assembleDebug --no-daemon --stacktrace
+          else
+            gradle assembleDebug --no-daemon --stacktrace
+          fi
+
+      - name: Upload APK as Artifact (Direct Laptop Download)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Passward-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
 
       - name: Create GitHub Release & Upload APK
         uses: softprops/action-gh-release@v2
@@ -106,9 +130,9 @@ include(":app")
   root.file(
     'build.gradle.kts',
     `plugins {
-    alias(libs.plugins.android.application) apply false
-    alias(libs.plugins.kotlin.android) apply false
-    alias(libs.plugins.kotlin.kapt) apply false
+    id("com.android.application") version "8.2.2" apply false
+    id("org.jetbrains.kotlin.android") version "1.9.22" apply false
+    id("org.jetbrains.kotlin.kapt") version "1.9.22" apply false
 }
 `
   );

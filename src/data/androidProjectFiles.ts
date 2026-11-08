@@ -63,9 +63,9 @@ export const ANDROID_PROJECT_FILES: AndroidFile[] = [
     language: 'groovy',
     description: 'Gradle configuration targeting Android 14 (API 34) with Jetpack Compose & Room',
     content: `plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.kapt)
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.kapt")
 }
 
 android {
@@ -703,6 +703,74 @@ chmod +x gradlew
 # 4. Install onto your connected Android 14 phone:
 adb install app/build/outputs/apk/debug/app-debug.apk
 \`\`\`
+`
+  },
+  {
+    path: '.github/workflows/build-apk.yml',
+    name: 'build-apk.yml',
+    language: 'groovy',
+    description: 'GitHub Actions workflow to automatically compile and release Android APK',
+    content: `name: Build Passward APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Check for Android Project Files
+        run: |
+          if [ ! -d "app" ]; then
+            echo "::error title=Missing Android Source Code::The 'app' folder was not found in your repository! Please upload the extracted Android project files (including 'app', 'gradlew', and 'build.gradle.kts') to this repository."
+            exit 1
+          fi
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build Debug APK
+        run: |
+          if [ -f "./gradlew" ]; then
+            chmod +x gradlew
+            ./gradlew assembleDebug --no-daemon --stacktrace
+          else
+            gradle assembleDebug --no-daemon --stacktrace
+          fi
+
+      - name: Upload APK as Artifact (Direct Download to Laptop)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Passward-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
+
+      - name: Create GitHub Release & Upload APK
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          name: Passward \${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: app/build/outputs/apk/debug/app-debug.apk
+        env:
+          GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
 `
   }
 ];
