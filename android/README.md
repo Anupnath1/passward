@@ -1,36 +1,49 @@
 # Passward — Native Android Offline Vault
 
-A 100% offline personal password vault for Android (API 26–34) built with **Kotlin**, **Jetpack Compose (Material 3)**, **Room Database**, **BiometricPrompt**, and hardware-backed **AndroidKeyStore AES-256-GCM**.
+A 100% offline personal password vault for Android (API 26–34) built with **Kotlin 2.0.21**, **Jetpack Compose (Material 3)**, **KSP Room Database**, **BiometricPrompt**, and hardware-backed **AndroidKeyStore AES-256-GCM**.
 
 ---
 
-## What Was Fixed
-- **Gradle Detection**: Added `gradle/wrapper/gradle-wrapper.properties` (Gradle 8.4) so Android Studio detects and downloads the correct Gradle toolchain automatically.
-- **Wrapper Scripts**: Included `gradlew` (Mac/Linux) and `gradlew.bat` (Windows).
-- **Gradle Configuration**: Added `gradle.properties` with AndroidX and memory flags.
-- **Architecture & Code**: Added complete Compose UI (`VaultScreens.kt`, `Theme.kt`, `Color.kt`), database layer (`PasswordEntity.kt`, `PasswordDao.kt`, `AppDatabase.kt`), biometric authentication (`BiometricAuthManager.kt`), and main activity (`MainActivity.kt`).
-- **Device Compatibility**: Configured `minSdk = 26` (Android 8.0+) through `compileSdk = 34` (Android 14+), ensuring the app installs on 95%+ of all Android phones.
-- **ProGuard & Resources**: Added `proguard-rules.pro`, strings, colors, themes, data extraction rules, and launcher vector icons.
+## 🚀 How to Setup and Run on Your Phone
+
+### Option 1: Direct APK Sideload (No Android Studio required)
+1. Download `app-debug.apk` directly from the [GitHub Actions Artifacts](https://github.com/Anupnath1/passward/actions) or [Releases](https://github.com/Anupnath1/passward/releases).
+2. On your phone: **Settings > Apps > Special app access > Install unknown apps** -> Enable for your file browser.
+3. Tap the `.apk` file and select **Install**.
 
 ---
 
-## How to Open & Run in Android Studio
-
+### Option 2: Open and Run in Android Studio
 1. **Open the project**:
-   - In Android Studio, click **File > Open...**
-   - Select the `android/` folder (or extracted project folder).
-   - Android Studio will detect Gradle 8.4 and automatically sync all dependencies.
+   - In Android Studio (Ladybug, Koala, or Hedgehog), click **File > Open...**
+   - Select this **`android/`** folder.
+   - Android Studio will detect Gradle and automatically sync all dependencies.
+   - Ensure your **Gradle JDK** is set to **JDK 17** (`Settings > Build, Execution, Deployment > Build Tools > Gradle > Gradle JDK`).
 
 2. **Run on your physical Android phone**:
-   - On your phone: **Settings > About phone > tap "Build number" 7 times** to unlock Developer options.
+   - On your phone: Go to **Settings > About phone** and tap **"Build number" 7 times** to unlock Developer options.
    - Go to **Settings > System > Developer options** and enable **USB debugging**.
-   - Plug your phone into your PC via USB and tap **"Allow"** when prompted on your phone.
-   - Select your phone in Android Studio's device selector toolbar.
+   - Plug your phone into your computer via USB and tap **"Allow"** when prompted on your phone.
+   - Select your physical phone in Android Studio's device selector toolbar.
    - Click the green **Run (▶)** button (`Shift + F10`).
 
-3. **Build the Standalone APK**:
+3. **Build the Standalone APK via CLI**:
    ```bash
    ./gradlew assembleDebug
    ```
    Output APK:
    `app/build/outputs/apk/debug/app-debug.apk`
+
+---
+
+## 🛠️ Toolchain Upgrades & Fixes Applied
+- **Compose Compiler**: Using `org.jetbrains.kotlin.plugin.compose` (official Kotlin 2.0+ Compose plugin).
+- **Kotlin**: Upgraded to `2.0.21`.
+- **AGP**: Upgraded to `8.7.3`.
+- **KSP Migration**: Migrated Room compiler from `kapt` to `ksp("androidx.room:room-compiler:2.6.1")` (kapt is incompatible with Kotlin 2.0+).
+- **Themes**: Bundled `com.google.android.material:material:1.11.0` for `Theme.Material3.DayNight.NoActionBar`.
+- **Executable Wrapper**: Ensured `chmod +x gradlew` executable permissions.
+- **Hardware Encryption**: Keystore AES-256-GCM master key generation with `EncryptedSharedPreferences` / `MasterKeys`.
+- **Privacy Shield**: Window flag `FLAG_SECURE` enabled in `MainActivity.kt` to prevent screenshots and screen sniffing.
+- **Zero Internet**: Zero network permissions declared in `AndroidManifest.xml`.
+- **4 Action Icons**: TopAppBar dialogs for Backup & Restore, Security Health Audit, Password Generator, and Settings.
